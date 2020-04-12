@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block graphs %}
+<div class="container">
+    <!-- TODO consider using canvas element -->
+    <div class="chart" id="barGraph"> 
+        {{barGraph | safe}}
+    </div>
+    <div class="chart" id="scatterPlot">
+        {{scatterPlot | safe}}
+    </div>
+</div>
+<div class="container">
+        <div class="chart">
+            <p id="test"></p>
+            <script>
+                document.getElementById('test').innerHTML = "{{test | safe}}";
+            </script>
+        </div>
+    </div>
+{% endblock %}
