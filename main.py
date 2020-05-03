@@ -1,5 +1,6 @@
-import plotly
+# import plotly
 import plotly.express as px
+import plotly.graph_objects as go
 
 import pandas as pd
 import numpy as np
@@ -7,7 +8,53 @@ import numpy as np
 from flask import Flask, render_template, request
 
 
-def create_bar(elementID, quantity):
+def create_bar_graph(quantity):
+    # sending the JSON of the graph object to plotly javascript front end as
+    # .newPlot(div, object)
+    if quantity is None:
+        quantity = 10
+    N = int(quantity)
+    x = np.linspace(0, 1, N)
+    y = np.random.randn(N)
+
+    # df = pd.DataFrame({'x': x, 'y': y})
+
+    fig = go.Figure(
+        data=[go.Bar(x=x, y=y)])
+
+    figJSON = fig.to_json()
+
+    return figJSON
+
+
+def create_bar_graph_from_object(elementID, quantity):
+    if quantity is None:
+        quantity = 10
+    N = int(quantity)
+    x = np.linspace(0, 1, N)
+    y = np.random.randn(N)
+
+    # df = pd.DataFrame({'x': x, 'y': y})
+
+    fig = go.Figure(
+        data=[go.Bar(x=x, y=y)],
+        layout=go.Layout(
+            title=go.layout.Title(
+                text="A Figure Specified By A Graph Object")))
+
+    JSONdata = fig.to_json()
+
+    jsTextStart = '<script>Plotly.newPlot('
+    jsLayout = ',{"title": "Hide the Modebar"}'
+    jsConfig = ',{"displayModeBar": false, "responsive": true}'
+    jsTextEnd = ');</script>'
+
+    jsToInsert = jsTextStart+elementID+","+JSONdata+jsLayout+jsConfig+jsTextEnd
+
+    return jsToInsert
+
+
+def create_bar_using_express(elementID, quantity):
     if quantity is None:
         quantity = 10
     N = int(quantity)
@@ -15,19 +62,24 @@ def create_bar(elementID, quantity):
     y = np.random.randn(N)
     df = pd.DataFrame({'x': x, 'y': y})
 
-    data = px.bar(
+    fig = px.bar(
         df,
         x='x',
-        y='y'
+        y='y',
+        title="A Plotly Express Figure"
         )
 
-    graphJSON = data.to_json()
-    
-    jsTextStart = "<script>Plotly.plot("
-    jsTextEnd = ",{});</script>//"    
-    jsToInsert = jsTextStart+elementID+','+graphJSON+jsTextEnd
+    JSONdata = fig.to_json()
+
+    jsTextStart = '<script>Plotly.newPlot('
+    jsLayout = ',{"title": "Hide the Modebar"}'
+    jsConfig = ',{"displayModeBar": false, "responsive": true}'
+    jsTextEnd = ');</script>'
+
+    jsToInsert = jsTextStart+elementID+","+JSONdata+jsLayout+jsConfig+jsTextEnd
 
     return jsToInsert
+
 
 def create_scatter(elementID, quantity):
     if quantity is None:
@@ -47,32 +99,39 @@ def create_scatter(elementID, quantity):
         marginal_x="histogram"
         )
 
-    graphJSON = data.to_json()
+    JSONdata = data.to_json()
 
-    jsTextStart = "<script>Plotly.plot("
-    jsTextEnd = ",{});</script>"    
-    jsToInsert = jsTextStart+elementID+','+graphJSON+jsTextEnd
+    jsTextStart = '<script>Plotly.newPlot('
+    jsTextEnd = ',{});</script>'
+    jsToInsert = jsTextStart+elementID+','+JSONdata+jsTextEnd
 
     return jsToInsert
+
 
 def testFunction():
     test = 'TEST {}'
     return test
 
+
 app = Flask(__name__)
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    
     quantity = request.form.get('quantityValue')
-    barGraph = create_bar("'barGraph'",quantity)
-    scatterPlot = create_scatter("'scatterPlot'",quantity)
+    barGraph = create_bar_graph(quantity)
+    scatterPlot = create_scatter("'scatterPlot'", quantity)
     test = testFunction()
 
     if request.method == 'POST':
         test += 'POSTED'
 
-    return render_template('index.html', barGraph=barGraph, scatterPlot=scatterPlot, test=test)
+    return render_template(
+        'index.html',
+        barGraph=barGraph,
+        scatterPlot=scatterPlot,
+        test=test)
+
 
 if __name__ == "__main__":
     # This is used when running locally only. When deploying to Google App

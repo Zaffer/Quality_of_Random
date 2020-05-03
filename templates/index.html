@@ -3,8 +3,16 @@
 {% block graphs %}
 <div class="container">
     <!-- TODO consider using canvas element -->
-    <div class="chart" id="barGraph"> 
-        {{barGraph | safe}}
+    <div class="chart" id="none"></div>
+    <div class="chart" id="barGraph2"> 
+        <script>
+            var graph = {{barGraph | safe}};
+            Plotly.newPlot("none",graph);
+            var gd = document.getElementById("none");
+            jd = gd.data;
+            Plotly.newPlot("barGraph2",jd,{title: 'barGraph2'},{displayModeBar: false});
+
+        </script>
     </div>
     <div class="chart" id="scatterPlot">
         {{scatterPlot | safe}}
