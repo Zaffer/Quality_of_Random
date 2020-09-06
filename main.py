@@ -1,116 +1,80 @@
 # import plotly
 import plotly.express as px
-import plotly.graph_objects as go
 
 import pandas as pd
 import numpy as np
 
+from io import StringIO
+
 from flask import Flask, render_template, request
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
-def create_bar_graph(quantity):
-    # sending the JSON of the graph object to plotly javascript front end as
-    # .newPlot(div, object)
-    if quantity is None:
-        quantity = 10
-    N = int(quantity)
-    x = np.linspace(0, 1, N)
-    y = np.random.randn(N)
 
-    # df = pd.DataFrame({'x': x, 'y': y})
+def create_bar_graph(randomText):
+    if randomText is None:
+        randomText = '\t'.join([str(np.random.randn()) for i in range(10)])
 
-    fig = go.Figure(
-        data=[go.Bar(x=x, y=y)])
+    app.logger.info("Creating bar graph with:"+str(randomText))
+    randomTextData = StringIO(randomText)
+    app.logger.info("StringIO got:"+randomTextData.getvalue())
+#   read the textarea, convert everything to float64, ignore excess columns
+    df = pd.read_csv(
+        randomTextData,
+        header=None,
+        sep="\t",
+        index_col=False,
+        error_bad_lines=False
+        )
+    df = df.apply(pd.to_numeric, errors='coerce')
+    df = df.astype("float64")
+    df.fillna(0)
+    app.logger.info("Datafram info:")
+    df.info()
+
+    fig = px.bar(df)
+
+#       #create figure from Graph Objects (needs import plotly graph objects)
+#     df = pd.DataFrame({'x': x, 'y': y})
+
+#     fig = go.Figure(
+#         data=[go.Bar(x=x, y=y)],
+#         layout=go.Layout(
+#             title=go.layout.Title(
+#                 text="A Figure Specified By A Graph Object")))
 
     figJSON = fig.to_json()
 
     return figJSON
 
 
-def create_bar_graph_from_object(elementID, quantity):
-    if quantity is None:
-        quantity = 10
-    N = int(quantity)
-    x = np.linspace(0, 1, N)
-    y = np.random.randn(N)
+def create_scatter(randomText):
+    if randomText is None:
+        randomText = '\t'.join([str(np.random.randn()) for i in range(10)])
 
-    # df = pd.DataFrame({'x': x, 'y': y})
-
-    fig = go.Figure(
-        data=[go.Bar(x=x, y=y)],
-        layout=go.Layout(
-            title=go.layout.Title(
-                text="A Figure Specified By A Graph Object")))
-
-    JSONdata = fig.to_json()
-
-    jsTextStart = '<script>Plotly.newPlot('
-    jsLayout = ',{"title": "Hide the Modebar"}'
-    jsConfig = ',{"displayModeBar": false, "responsive": true}'
-    jsTextEnd = ');</script>'
-
-    jsToInsert = jsTextStart+elementID+","+JSONdata+jsLayout+jsConfig+jsTextEnd
-
-    return jsToInsert
-
-
-def create_bar_using_express(elementID, quantity):
-    if quantity is None:
-        quantity = 10
-    N = int(quantity)
-    x = np.linspace(0, 1, N)
-    y = np.random.randn(N)
-    df = pd.DataFrame({'x': x, 'y': y})
-
-    fig = px.bar(
-        df,
-        x='x',
-        y='y',
-        title="A Plotly Express Figure"
+    app.logger.info("Creating scatter plot with:"+str(randomText))
+    randomTextData = StringIO(randomText)
+    app.logger.info("StringIO got:"+randomTextData.getvalue())
+#   read the textarea, convert everything to float64, ignore excess columns
+    df = pd.read_csv(
+        randomTextData,
+        header=None,
+        sep="\t",
+        index_col=False,
+        error_bad_lines=False
         )
+    df = df.apply(pd.to_numeric, errors='coerce')
+    df = df.astype("float64")
+    df.fillna(0)
+    app.logger.info("Datafram info:")
+    df.info()
 
-    JSONdata = fig.to_json()
+    fig = px.scatter(df)
 
-    jsTextStart = '<script>Plotly.newPlot('
-    jsLayout = ',{"title": "Hide the Modebar"}'
-    jsConfig = ',{"displayModeBar": false, "responsive": true}'
-    jsTextEnd = ');</script>'
+    figJSON = fig.to_json()
 
-    jsToInsert = jsTextStart+elementID+","+JSONdata+jsLayout+jsConfig+jsTextEnd
-
-    return jsToInsert
-
-
-def create_scatter(elementID, quantity):
-    if quantity is None:
-        quantity = 10
-    N = int(quantity)
-    x = np.random.randn(N)
-    xFactors = x
-    y = np.random.randn(N)
-    df = pd.DataFrame({'x': x, 'y': y, 'colors': xFactors})
-
-    data = px.scatter(
-        df,
-        x='x',
-        y='y',
-        color='colors',
-        marginal_y="rug",
-        marginal_x="histogram"
-        )
-
-    JSONdata = data.to_json()
-
-    jsTextStart = '<script>Plotly.newPlot('
-    jsTextEnd = ',{});</script>'
-    jsToInsert = jsTextStart+elementID+','+JSONdata+jsTextEnd
-
-    return jsToInsert
-
-
-def testFunction():
-    test = 'TEST {}'
-    return test
+    return figJSON
 
 
 app = Flask(__name__)
@@ -118,19 +82,19 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    quantity = request.form.get('quantityValue')
-    barGraph = create_bar_graph(quantity)
-    scatterPlot = create_scatter("'scatterPlot'", quantity)
-    test = testFunction()
+    app.logger.info('-------LOGGER DEBUG-------')
+    randomText = request.form.get('textArea')
+    app.logger.info('text area form got:'+str(randomText))
+    barGraph = create_bar_graph(randomText)
+    scatterPlot = create_scatter(randomText)
 
     if request.method == 'POST':
-        test += 'POSTED'
+        app.logger.info('POSTED')
 
     return render_template(
         'index.html',
         barGraph=barGraph,
-        scatterPlot=scatterPlot,
-        test=test)
+        scatterPlot=scatterPlot)
 
 
 if __name__ == "__main__":

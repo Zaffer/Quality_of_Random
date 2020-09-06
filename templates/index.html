@@ -1,28 +1,37 @@
 {% extends "base.html" %}
 
 {% block graphs %}
+<script>
+        console.log("-----CONSOLE LOGGING-----\nindex.html loaded")
+</script>
 <div class="container">
     <!-- TODO consider using canvas element -->
-    <div class="chart" id="none"></div>
-    <div class="chart" id="barGraph2"> 
+
+    <div class="chart" id="barGraph"> 
         <script>
+            console.log("making a Bar Graph");
             var graph = {{barGraph | safe}};
-            Plotly.newPlot("none",graph);
-            var gd = document.getElementById("none");
-            jd = gd.data;
-            Plotly.newPlot("barGraph2",jd,{title: 'barGraph2'},{displayModeBar: false});
+
+            Plotly.newPlot("barGraph",graph.data,{title: 'Bar Graph'},{displayModeBar: false});
 
         </script>
     </div>
     <div class="chart" id="scatterPlot">
-        {{scatterPlot | safe}}
+        <script>
+            console.log("making a scatter plot");
+            var graph = {{scatterPlot | safe}};
+
+            Plotly.newPlot("scatterPlot",graph.data,{title: 'Scatter Plot'},{displayModeBar: false});
+
+        </script>
+        
     </div>
 </div>
 <div class="container">
         <div class="chart">
             <p id="test"></p>
             <script>
-                document.getElementById('test').innerHTML = "{{test | safe}}";
+                console.log("{{test | safe}}");
             </script>
         </div>
     </div>

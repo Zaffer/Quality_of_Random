@@ -2,6 +2,9 @@
 <html>
 <head>
     <title>Quality of Random</title>
+    <script>
+        console.log("base.html loaded")
+    </script>
     
     <script src="{{ url_for('static', filename='script.js') }}"></script>
     <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -13,7 +16,7 @@
 </head>
 <body>
     <h1>Visaully test the quality of a random number generator:</h1>
-    <form id="info" method="POST">
+    <!-- <form id="info" method="POST">
         Size of sample (1 to 100):
         <input type="number" name="quantityValue" min="1" max="10000" value="10">
         </br>
@@ -22,6 +25,13 @@
         <input type="submit" value="Submit">
         </br>
         <input type="reset">
+    </form> -->
+    <form id="info" action="" method="POST">
+        <label for="textArea">Paste or type your random numbers in here seperated by tabs ' ' (maximum of 10,000 characters. New lines in the textarea create a new row in dataframe and are ignored if more columns then first row)</label><br>
+        <textarea name="textArea" id="textArea" name="textArea" rows="20" cols="100" maxlength="10000"  autofocus required onkeydown="if(event.keyCode===9){var v=this.value,s=this.selectionStart,e=this.selectionEnd;this.value=v.substring(0, s)+'\t'+v.substring(e);this.selectionStart=this.selectionEnd=s+1;return false;}">{{ request.form['textArea'] }}</textarea>
+        </br>
+        <input type="submit" value="Submit">
+        <input type="Reset">
     </form>
     {% block graphs%}{% endblock %}
     
