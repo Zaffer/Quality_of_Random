@@ -12,25 +12,102 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 
 
-def create_bar_graph(randomText):
+def create_unique_bar_graph(randomText, seperator):
     if randomText is None:
         randomText = '\t'.join([str(np.random.randn()) for i in range(10)])
 
-    app.logger.info("Creating bar graph with:"+str(randomText))
-    randomTextData = StringIO(randomText)
-    app.logger.info("StringIO got:"+randomTextData.getvalue())
-#   read the textarea, convert everything to float64, ignore excess columns
+    app.logger.info("Creating bar graph with: "+str(randomText))
+    app.logger.info("Using seperator: "+str(seperator))
+
+    # randomTextData = StringIO(randomText)
+    # app.logger.info("StringIO got: "+str(randomTextData.getvalue()))
+    #   read the textarea, convert everything to float64, ignore excess columns
+
+    random_text_data_list = randomText.split(str(seperator))
+    app.logger.info("list length: " + str(len(random_text_data_list)))
+
+    # for entry in random_text_data_list:
+    #     app.logger.info("Each entry: " + str(entry))
+
+    # intilize a null list
+    unique_list = []
+
+    # traverse for all elements
+    for entry in random_text_data_list:
+        # check if exists in unique_list or not
+        if entry not in unique_list:
+            unique_list.append(entry)
+
+    # # print list
+    # for entry in unique_list:
+    #     app.logger.info("Each unique entry: " + str(entry))
+
+    random_text_data_list_indexes = ''
+
+    for entry in random_text_data_list:
+        for unique_entry in unique_list:
+            if entry == unique_entry:
+                random_text_data_list_indexes += str(unique_list.index(unique_entry)+1)+"\t"
+
+    app.logger.info("list into indexes: " + random_text_data_list_indexes)
+
+    random_text_data_list_indexes_IO = StringIO(random_text_data_list_indexes)
+
     df = pd.read_csv(
-        randomTextData,
+        random_text_data_list_indexes_IO,
         header=None,
         sep="\t",
         index_col=False,
         error_bad_lines=False
         )
+    app.logger.info("Dataframe read CSV: ")
+    df.info()
+
     df = df.apply(pd.to_numeric, errors='coerce')
     df = df.astype("float64")
     df.fillna(0)
-    app.logger.info("Datafram info:")
+    app.logger.info("Datafram to numeric: ")
+    df.info()
+
+    fig = px.bar(df)
+
+    #       #create figure from Graph Objects (needs import plotly graph objects)
+    #     df = pd.DataFrame({'x': x, 'y': y})
+
+    #     fig = go.Figure(
+    #         data=[go.Bar(x=x, y=y)],
+    #         layout=go.Layout(
+    #             title=go.layout.Title(
+    #                 text="A Figure Specified By A Graph Object")))
+
+    figJSON = fig.to_json()
+
+    return figJSON
+
+
+def create_bar_graph(randomText, seperator):
+    if randomText is None:
+        randomText = '\t'.join([str(np.random.randn()) for i in range(10)])
+
+    app.logger.info("Creating bar graph with: "+str(randomText))
+    randomTextData = StringIO(randomText)
+    app.logger.info("StringIO got: "+str(randomTextData.getvalue()))
+#   read the textarea, convert everything to float64, ignore excess columns
+
+    df = pd.read_csv(
+        randomTextData,
+        header=None,
+        sep=seperator,
+        index_col=False,
+        error_bad_lines=False
+        )
+    app.logger.info("Dataframe read CSV: ")
+    df.info()
+
+    df = df.apply(pd.to_numeric, errors='coerce')
+    df = df.astype("float64")
+    df.fillna(0)
+    app.logger.info("Datafram to numeric: ")
     df.info()
 
     fig = px.bar(df)
@@ -49,7 +126,7 @@ def create_bar_graph(randomText):
     return figJSON
 
 
-def create_scatter(randomText):
+def create_scatter(randomText, seperator):
     if randomText is None:
         randomText = '\t'.join([str(np.random.randn()) for i in range(10)])
 
@@ -60,7 +137,7 @@ def create_scatter(randomText):
     df = pd.read_csv(
         randomTextData,
         header=None,
-        sep="\t",
+        sep=seperator,
         index_col=False,
         error_bad_lines=False
         )
@@ -83,10 +160,13 @@ app = Flask(__name__)
 @app.route('/', methods=['GET', 'POST'])
 def index():
     app.logger.info('-------LOGGER DEBUG-------')
+    seperator = request.form.get('seperator')
     randomText = request.form.get('textArea')
-    app.logger.info('text area form got:'+str(randomText))
-    barGraph = create_bar_graph(randomText)
-    scatterPlot = create_scatter(randomText)
+    app.logger.info('text area form got: '+str(randomText))
+    uniqueBarGraph = create_unique_bar_graph(randomText, seperator)
+    barGraph = create_bar_graph(randomText, seperator)
+    scatterPlot = create_scatter(randomText, seperator)
+
 
     if request.method == 'POST':
         app.logger.info('POSTED')
@@ -94,7 +174,8 @@ def index():
     return render_template(
         'index.html',
         barGraph=barGraph,
-        scatterPlot=scatterPlot)
+        scatterPlot=scatterPlot,
+        uniqueBarGraph=uniqueBarGraph)
 
 
 if __name__ == "__main__":
