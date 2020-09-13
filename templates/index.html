@@ -6,7 +6,15 @@
 </script>
 <div class="container">
     <!-- TODO consider using canvas element -->
+    <div class="chart" id="uniqueBarGraph"> 
+        <script>
+            console.log("making a Unique Bar Graph");
+            var graph = {{uniqueBarGraph | safe}};
 
+            Plotly.newPlot("uniqueBarGraph",graph.data,{title: 'Unique Bar Graph'},{displayModeBar: false});
+
+        </script>
+    </div>
     <div class="chart" id="barGraph"> 
         <script>
             console.log("making a Bar Graph");

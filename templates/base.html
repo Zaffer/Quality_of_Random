@@ -27,7 +27,20 @@
         <input type="reset">
     </form> -->
     <form id="info" action="" method="POST">
-        <label for="textArea">Paste or type your random numbers in here seperated by tabs ' ' (maximum of 10,000 characters. New lines in the textarea create a new row in dataframe and are ignored if more columns then first row)</label><br>
+        <h2>Select a seperator for columns:</h2>
+        <input type="radio" id="tab" name="seperator" value="\t" checked="checked">
+        <label for="tab">TAB "   "(default)</label></br>
+        <input type="radio" id="comma" name="seperator" value=",">
+        <label for="comma">,</label></br>
+        <input type="radio" id="semicolon" name="seperator" value=";">
+        <label for="semicolon">;</label></br>
+        <input type="radio" id="period" name="seperator" value=".">
+        <label for="period">.</label></br>
+        <input type="radio" id="space" name="seperator" value=" ">
+        <label for="space">SPACE " "</label>
+        </br></br>
+        <h2>Enter random numbers or text:</h2>
+        <label for="textArea">Place your data in the textarea. Maximum of 10,000 characters. New lines ("\n") in the textarea create a new row in dataframe and are ignored if it contains more columns then first row.</label><br>
         <textarea name="textArea" id="textArea" name="textArea" rows="20" cols="100" maxlength="10000"  autofocus required onkeydown="if(event.keyCode===9){var v=this.value,s=this.selectionStart,e=this.selectionEnd;this.value=v.substring(0, s)+'\t'+v.substring(e);this.selectionStart=this.selectionEnd=s+1;return false;}">{{ request.form['textArea'] }}</textarea>
         </br>
         <input type="submit" value="Submit">
