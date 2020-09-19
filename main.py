@@ -25,10 +25,10 @@ def create_unique_bar_graph(randomText, seperator):
 
     if seperator == "\\t":
         random_text_data_list = randomText.split("\t")
-        app.logger.info('Since TAB, use: "\t"')
+        # app.logger.info('Since TAB, use: "\t"')
     else:
         random_text_data_list = randomText.split(seperator)
-        app.logger.info("Since other seperator, use: "+seperator)
+        # app.logger.info("Since other seperator, use: "+seperator)
 
     app.logger.info("list length: " + str(len(random_text_data_list)))
 
@@ -172,7 +172,6 @@ def index():
     uniqueBarGraph = create_unique_bar_graph(randomText, seperator)
     barGraph = create_bar_graph(randomText, seperator)
     scatterPlot = create_scatter(randomText, seperator)
-
 
     if request.method == 'POST':
         app.logger.info('POSTED')
