@@ -11,6 +11,8 @@ from flask import Flask, render_template, request
 import logging
 logging.basicConfig(level=logging.DEBUG)
 
+import cell_automata as ca
+
 
 def create_unique_bar_graph(randomText, seperator):
     if randomText is None:
@@ -98,7 +100,7 @@ def create_bar_graph(randomText, seperator):
     app.logger.info("Creating bar graph with: "+str(randomText))
     randomTextData = StringIO(randomText)
     app.logger.info("StringIO got: "+str(randomTextData.getvalue()))
-#   read the textarea, convert everything to float64, ignore excess columns
+    #   read the textarea, convert everything to float64, ignore excess columns
 
     df = pd.read_csv(
         randomTextData,
@@ -118,14 +120,14 @@ def create_bar_graph(randomText, seperator):
 
     fig = px.bar(df)
 
-#       #create figure from Graph Objects (needs import plotly graph objects)
-#     df = pd.DataFrame({'x': x, 'y': y})
+    #       #create figure from Graph Objects (needs import plotly graph objects)
+    #     df = pd.DataFrame({'x': x, 'y': y})
 
-#     fig = go.Figure(
-#         data=[go.Bar(x=x, y=y)],
-#         layout=go.Layout(
-#             title=go.layout.Title(
-#                 text="A Figure Specified By A Graph Object")))
+    #     fig = go.Figure(
+    #         data=[go.Bar(x=x, y=y)],
+    #         layout=go.Layout(
+    #             title=go.layout.Title(
+    #                 text="A Figure Specified By A Graph Object")))
 
     figJSON = fig.to_json()
 
@@ -139,7 +141,7 @@ def create_scatter(randomText, seperator):
     app.logger.info("Creating scatter plot with:"+str(randomText))
     randomTextData = StringIO(randomText)
     app.logger.info("StringIO got:"+randomTextData.getvalue())
-#   read the textarea, convert everything to float64, ignore excess columns
+    #   read the textarea, convert everything to float64, ignore excess columns
     df = pd.read_csv(
         randomTextData,
         header=None,
@@ -181,6 +183,25 @@ def index():
         barGraph=barGraph,
         scatterPlot=scatterPlot,
         uniqueBarGraph=uniqueBarGraph)
+
+
+@app.route('/rule_30', methods=['GET', 'POST'])
+def rule_30():
+    """for rule 30 html page"""
+
+    steps = request.args.get("steps", type=int)
+
+    if steps is None:
+        steps = 10
+
+    cell_json = ca.get_rule_30(steps)
+
+    cell_json[0]["type"] = 'heatmap'
+    cell_json[0]["showscale"] = False
+
+    return render_template(
+        "rule_30.html",
+        cell_json=cell_json)
 
 
 if __name__ == "__main__":

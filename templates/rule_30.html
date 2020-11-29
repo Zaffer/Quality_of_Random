@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+    <head>
+        <title>Rule 30 - Problem 3</title>
+        
+        <link type="text/css" rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        
+        <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+        <script
+        src="https://code.jquery.com/jquery-3.5.1.min.js"
+        integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+        crossorigin="anonymous"></script>
+</head>
+<body>
+<script>
+        console.log("-----CONSOLE LOGGING-----\nrule-30.html loaded")
+</script>
+            
+<p>Enter number of steps to generate:</p>
+<form>
+    <label for="steps">
+        <input id="stepCount" type="number" name="steps" value="10">
+    </label>
+    <button type="submit">GO!</button>
+</form>
+
+<div class="container" style="width: 500px;height: 500px;">
+        <div id="cellSpace">
+
+        </div>
+    </div>
+</body>
+<footer>
+    <script>
+        const params = new URLSearchParams(location.search);
+        // if ($("#remember").prop('checked')) {
+        //     const email = document.getElementById("email").value;
+        //     localStorage.setItem("email", email);
+        // } else if(params.get('email') !== null) {
+        //     localStorage.setItem("email", params.get('email'));
+        // }
+        $('#stepCount').val(params.get('steps'))
+    
+    </script>  
+  <script>
+
+    var cellJson = {{ cell_json | tojson }};
+
+
+    Plotly.newPlot('cellSpace', cellJson, {title: 'Rule 30'}, {displayModeBar: false});
+
+</script>  
+</footer>
+
+</html>
